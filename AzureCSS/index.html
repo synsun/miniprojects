@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>URL Generator</h2>
+
+<form id="urlForm">
+  <label for="location">Location (ex: XStoreShoeboxKOREACENTRAL):</label><br>
+  <input type="text" id="location" name="location" value="XStoreShoeboxKOREACENTRAL" style="width: 800px;"><br>
+  <label for="tenant">Tenant (MS-SE~A):</label><br>
+  <input type="text" id="tenant" name="tenant" style="width: 800px;"><br>
+  <label for="storagePath">Full Storage account path (/subscriptions/~/resourceGroups/~/providers/Microsoft.Storage/storageAccounts/~):</label><br>
+  <input type="text" id="storagePath" name="storagePath" style="width: 800px;"><br>
+  <input type="submit" value="Generate URL">
+</form>
+
+<p id="generatedUrl"></p>
+
+<script>
+    document.getElementById('urlForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+    
+      var location = document.getElementById('location').value;
+      var tenant = document.getElementById('tenant').value;
+      var storagePath = document.getElementById('storagePath').value;
+      
+      var pathParts = storagePath.split('/');
+      var name = pathParts[pathParts.length - 1];
+    
+      var overrides = [
+        {"query":"//dataSources","key":"account","replacement":location},
+        {"query":"//*[id='Tenant']","key":"value","replacement":tenant},
+        {"query":"//*[id='AccountResourceId']","key":"value","replacement":storagePath},
+        {"query":"//*[id='ObjectType']","key":"value","replacement":""}
+      ];
+    
+      var url1 = `https://jarvis-west.dc.ad.msft.net/dashboard/XStore/Availability/Account SLA Shoebox Metrics?overrides=${encodeURIComponent(JSON.stringify(overrides))}`;
+
+      var url2 = `https://jarvis-west.dc.ad.msft.net/dashboard/XStore/XFE/Blob/Shoebox API Investigation Dashboard?overrides=${encodeURIComponent(JSON.stringify(overrides))}`;
+
+      var url3 = `https://jarvis-west.dc.ad.msft.net/dashboard/XStore/Shoebox/AccountCapacity?overrides=${encodeURIComponent(JSON.stringify(overrides))}`;
+
+      var url4 = `https://portal.microsoftgeneva.com/dashboard/XStore/Shoebox/AccountBlobCapacity?overrides=${encodeURIComponent(JSON.stringify(overrides))}`;
+    
+      document.getElementById('generatedUrl').innerHTML = `
+      [ MDM Dashboards ]
+      <br />
+      <a href="${url1}">Account SLA Shoebox Metrics</a>
+      <br />
+      <a href="${url2}">Shoebox API Investigation Dashboard</a>
+      <br />
+      <a href="${url3}">Account Capacity Shoebox Metrics</a>
+      <br />
+      <a href="${url4}">Blob Capacity Shoebox Metrics</a>
+      <br />
+      `;
+
+      var overrides2 = [
+        ["Tenant",tenant],
+        ["__TagStorageStamp__",tenant]
+      ];
+
+      var conditions = [
+      ["Account","contains",name]
+      ]
+
+      var url5 = `https://jarvis-west.dc.ad.msft.net/logs/dgrep?page=logs&be=DGrep&ep=Diagnostics PROD&ns=Xstore&en=NativeFePerfMetric&scopingConditions=${encodeURIComponent(JSON.stringify(overrides2))}&conditions=${encodeURIComponent(JSON.stringify(conditions))}`;
+
+        var url6 = `https://jarvis-west.dc.ad.msft.net/logs/dgrep?page=logs&be=DGrep&ep=Diagnostics PROD&ns=Xstore&en=FrontEndSummaryPerfLogs&scopingConditions=${encodeURIComponent(JSON.stringify(overrides2))}&conditions=${encodeURIComponent(JSON.stringify(conditions))}`;
+
+        var url7 = `https://jarvis-west.dc.ad.msft.net/logs/dgrep?page=logs&be=DGrep&ep=Diagnostics PROD&ns=Xstore&en=FileFrontEndSummaryPerfLogs&scopingConditions=${encodeURIComponent(JSON.stringify(overrides2))}&conditions=${encodeURIComponent(JSON.stringify(conditions))}`;
+
+        var url8 = `https://jarvis-west.dc.ad.msft.net/logs/dgrep?page=logs&be=DGrep&ep=Diagnostics PROD&ns=Xstore&en=XSMBPerfMetric&scopingConditions=${encodeURIComponent(JSON.stringify(overrides2))}&conditions=${encodeURIComponent(JSON.stringify(conditions))}`;
+
+        var url9 = `https://jarvis-west.dc.ad.msft.net/logs/dgrep?page=logs&be=DGrep&ep=Diagnostics PROD&ns=Xstore&en=NativeFeNFSv3PerfMetric&scopingConditions=${encodeURIComponent(JSON.stringify(overrides2))}&conditions=${encodeURIComponent(JSON.stringify(conditions))}`;
+
+        document.getElementById('generatedUrl').innerHTML += `
+        <br /><br />
+        [ DGrep Links ]
+        <br />
+        <a href="${url5}">NativeFePerfMetric</a>
+        <br />
+        <a href="${url6}">FrontEndSummaryPerfLogs</a>
+        <br />
+        <a href="${url7}">FileFrontEndSummaryPerfLogs</a>
+        <br />
+        <a href="${url8}">XSMBPerfMetric</a>
+        <br />
+        <a href="${url9}">NativeFeNFSv3PerfMetric</a>
+        <br />
+        `;
+    });
+    </script>
+
+</body>
+</html>

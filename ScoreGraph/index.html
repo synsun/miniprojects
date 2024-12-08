@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Score Graph</title>
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Set the viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    머니게임 2023-12-29 회고를 위한 점수 그래프 생성기
+    <form id="scoreForm">
+        <h1>점수 입력(-100 ~ 100)</h1>
+        <div id="scoreInputs">
+            <!-- 점수 입력 필드가 여기에 생성됩니다 -->
+        </div>
+        <label for="nameInput">성함:</label>
+        <input type="text" id="nameInput">
+        <br />
+        <button id="generateBtn">그래프 생성</button>
+    </form>
+    <button id="downloadBtn">그래프 다운로드 (생성하고 5초뒤에 받으세요)</button>
+    <br />
+    <canvas id="scoreChart"></canvas>
+</body>
+
+</html>
+
+<script>
+    // 각 월에 대한 점수 입력 필드 생성
+    const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+    const scoreInputs = document.getElementById('scoreInputs');
+    months.forEach(month => {
+        scoreInputs.innerHTML += `<label for="${month}">${month}: </label><input id="${month}" type="range" min="-100" max="100" value="0" required><span id="${month}Score">0</span><br>`;
+    });
+
+    // Update score display when slider changes
+    months.forEach(month => {
+        document.getElementById(month).addEventListener('input', function () {
+            document.getElementById(month + 'Score').textContent = this.value;
+        });
+    });
+
+    let chart; // chart 변수를 외부에서 정의
+
+    // 폼 제출 처리
+    document.getElementById('scoreForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // 입력된 점수 가져오기
+        const scores = months.map(month => document.getElementById(month).value);
+
+        // Set canvas background to white
+        const canvas = document.getElementById('scoreChart');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+        // 그래프 그리기
+        if (chart) {
+            chart.destroy();
+        }
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: '점수',
+                    data: scores,
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: document.getElementById('nameInput').value,
+                    position: 'top'  // Set title position to the top
+                },
+                plugins: {
+                    subtitle: {
+                        display: true,
+                        text: document.getElementById('nameInput').value + ' 2023년 점수 그래프',
+                        font: {
+                            size: 20
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: -100,  // Set y-axis min value
+                        max: 100  // Set y-axis max value
+                    }
+                },
+                animation: {
+                    onComplete: () => {
+                        const ctx = chart.ctx;
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'destination-over';
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, chart.width, chart.height);
+                        ctx.restore();
+                    }
+                }
+            }
+        });
+    });
+    // Handle graph download
+    document.getElementById('downloadBtn').addEventListener('click', function () {
+            const name = document.getElementById('nameInput').value;
+            const link = document.createElement('a');
+            link.download = name + '_scoreGraph.jpg';
+            link.href = document.getElementById('scoreChart').toDataURL('image/jpeg', 1.0);
+            link.click();
+        });
+</script>

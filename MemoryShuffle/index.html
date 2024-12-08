@@ -1,0 +1,193 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <select id="languageSelect">
+        <option>Language</option>
+        <option value="en">English</option>
+        <option value="ko">한국어</option>
+    </select>
+    <container>
+        <h1 class="title">Deck of CSS Cards shuffled with jquery</h1>
+        <controls>
+            <div style="display: flex; align-items: center;justify-content:center;">
+                <div class="amount_of_cards">Amount Of Cards</div>&nbsp;&nbsp;
+                <select name="cardAmount" class="cardAmount"></select>&nbsp;&nbsp;
+                <span class="btn-refresh shuffle">Shuffle Deck</span>&nbsp;&nbsp;
+
+                <!-- Add these elements to your HTML where you want the timers to be displayed -->
+                <div class="memorizing_time">Memorizing time</div>&nbsp;
+                <div id="timer1">00:00</div>&nbsp;
+                <div class="solving_time">Solving time</div>&nbsp;
+                <div id="timer2">00:00</div>&nbsp;&nbsp;
+                <button class="btn_game_start">Game Start</button>
+
+            </div>
+        </controls>
+    </container>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Tulpen+One" rel="stylesheet">
+
+    <!-- CSS 파일에 미디어 쿼리를 추가하여 화면 크기에 따라 스타일을 조정해야 합니다. -->
+    <link rel="stylesheet" href="cards.css">
+    <script src="cards.js"></script>
+
+    <script src="https://unpkg.com/i18next@19.9.2/i18next.min.js"></script>
+    <script>
+        var translations = {
+            en: {
+                translation: {
+                    title: 'Memory Shuffle Game',
+                    amount_of_cards: 'Amount Of Cards',
+                    shuffle: 'Shuffle Deck',
+                    memorizing_time: 'Memorizing time',
+                    solving_time: 'Solving time',
+                    btn_game_start: 'Game Start',
+                },
+            },
+            ko: {
+                translation: {
+                    title: '카드 암기 게임',
+                    amount_of_cards: '카드 수',
+                    shuffle: '섞기',
+                    memorizing_time: '암기 시간',
+                    solving_time: '풀이 시간',
+                    btn_game_start: '게임 시작',
+                },
+            },
+            // Add more languages as needed
+        };
+
+        function applyTranslation(lang) {
+            // Get the translation keys for the selected language
+            const keys = Object.keys(translations[lang].translation);
+
+            // Iterate over each key
+            keys.forEach(function (key) {
+                // Find elements with a class that matches the key
+                const elements = document.getElementsByClassName(key);
+
+                // Iterate over each matching element and update the text
+                Array.from(elements).forEach(function (element) {
+                    element.textContent = translations[lang].translation[key];
+                });
+            });
+        }
+
+        // Get the first language of the user's browser
+        var userLang = navigator.language || navigator.userLanguage;
+        userLang = userLang.substring(0, 2); // Get the first part (e.g., 'en' from 'en-US')
+
+        i18next.init({
+            lng: userLang, // default language
+            resources: translations,
+        }, function (err, t) {
+            // initialized and ready to go!
+            applyTranslation(i18next.language);
+        });
+
+        // Apply translation when language changes
+        document.querySelector('#languageSelect').addEventListener('change', function () {
+            i18next.changeLanguage(this.value).then(() => {
+                applyTranslation(i18next.language);
+            });
+        });
+    </script>
+    <script>
+        var timer1, timer2;
+        var timer1Seconds = 0;
+        var timer2Seconds = 0;
+
+        // Get the timer display elements
+        var timer1Display = document.getElementById('timer1');
+        var timer2Display = document.getElementById('timer2');
+
+        // Get the Game Start button
+        var btnGameStart = document.querySelector(".btn_game_start");
+        btnGameStart.disabled = true; // Disable the Game Start button initially
+
+        function formatTime(seconds) {
+            var minutes = Math.floor(seconds / 60);
+            var remainingSeconds = seconds % 60;
+            return minutes + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds;
+        }
+
+        // Start the first timer when the Mix button is clicked
+        document.querySelector('.btn-refresh').addEventListener('click', function () {
+            gameStart = false;
+            // Clear the first timer and reset the timer value if it's already running
+            if (timer1) {
+                clearInterval(timer1);
+                timer1Seconds = 0;
+                timer1Display.textContent = formatTime(timer1Seconds);
+            }
+
+            timer1 = setInterval(function () {
+                timer1Seconds++;
+                timer1Display.textContent = formatTime(timer1Seconds);
+            }, 1000);
+
+            // Clear the second timer and reset the timer value if it's already running
+            if (timer2) {
+                clearInterval(timer2);
+                timer2Seconds = 0;
+                timer2Display.textContent = formatTime(timer2Seconds);
+            }
+
+            btnGameStart.disabled = false; // Enable the Game Start button
+        });
+
+        var gameOver = false;
+
+        // When the Game Start button is clicked, stop the first timer, start the second timer, and flip all cards
+        btnGameStart.addEventListener('click', function () {
+            clearInterval(timer1);
+            gameStart = true;
+            gameOver = false;
+
+            timer2 = setInterval(function () {
+                if (gameOver) {
+                    clearInterval(timer2);
+                    return;
+                }
+                timer2Seconds++;
+                timer2Display.textContent = formatTime(timer2Seconds);
+            }, 1000);
+
+            // Get all the cards
+            var cards = document.querySelectorAll('card');
+
+            // Flip all cards
+            cards.forEach(function (card) {
+                card.classList.add('flipped');
+
+                // Add a click event listener to each card
+                card.addEventListener('click', function () {
+                    // Delay the check for all cards being flipped until after the card flip animation
+                    setTimeout(function () {
+                        // Check if all cards are flipped
+                        var allFlipped = Array.from(cards).every(function (card) {
+                            return !card.classList.contains('flipped');
+                        });
+
+                        if (allFlipped && !gameOver) {
+                            // If all cards are flipped and the game is not over, stop the timer and display a congratulatory message
+                            clearInterval(timer2);
+                            alert('Congratulations! You finished the game in ' + formatTime(timer2Seconds) + '!');
+                            gameOver = true;
+                        }
+                    }, 1000); // Delay for 1 second, adjust this value to match your card flip animation duration
+                });
+            });
+
+            btnGameStart.disabled = true; // Disable the Game Start button
+        });
+    </script>
+</body>
+
+</html>
