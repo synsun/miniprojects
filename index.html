@@ -23,13 +23,13 @@
             color: #ff6f61;
             text-decoration: none;
             font-weight: bold;
-            font-size: 24px; /* 글자 크기를 동일하게 설정 */
+            font-size: 24px;
         }
         .header a:hover {
             color: #ff9f91;
         }
         .header .small-text {
-            font-size: 24px; /* 글자 크기를 동일하게 설정 */
+            font-size: 24px;
             color: #ddd;
         }
         .project-list {
@@ -100,67 +100,49 @@
             <span class="small-text">small project listing</span>
         </div>
     </div>
+
     <div class="container project-list">
         <ul class="list-group mt-3">
-            <?php
-            // Get the current directory
-            $dir = __DIR__;
-
-            // Load descriptions from JSON file
-            $descriptionsFile = 'descriptions.json';
-            $descriptions = [];
-            if (file_exists($descriptionsFile)) {
-                $descriptions = json_decode(file_get_contents($descriptionsFile), true);
-            }
-
-            // Scan the directory
-            $directories = array_filter(glob($dir . '/*'), 'is_dir');
-
-            // Create an array to hold directories with their creation dates
-            $directoryData = [];
-            $years = [];
-
-            // Iterate over the directories
-            foreach ($directories as $directory) {
-                // Get the directory name
-                $name = basename($directory);
-
-                // Get the directory creation date
-                $creationDate = date("Y-m-d", filemtime($directory));
-                $year = date("Y", filemtime($directory));
-                $years[] = $year;
-
-                // Store the directory data
-                $directoryData[] = ['name' => $name, 'date' => $creationDate, 'path' => $directory, 'description' => $descriptions[$name] ?? ''];
-            }
-
-            // Sort the directories by date in descending order
-            usort($directoryData, function($a, $b) {
-                return strtotime($b['date']) - strtotime($a['date']);
-            });
-
-            // Output the sorted directories
-            foreach ($directoryData as $data) {
-                echo "<li class='list-group-item' onclick=\"location.href='./{$data['name']}'\">";
-                echo "<div class='item-header'><span class='date'>{$data['date']}</span><span class='project-name'>{$data['name']}</span></div>";
-                if (!empty($data['description'])) {
-                    echo "<div class='description'>{$data['description']}</div>";
-                }
-                echo "</li>";
-            }
-
-            // Determine the range of years
-            $years = array_unique($years);
-            sort($years);
-            $yearRange = count($years) > 1 ? "{$years[0]} - " . end($years) : "{$years[0]}";
-            ?>
+            <!-- MemoryShuffle -->
+            <li class="list-group-item" onclick="location.href='./MemoryShuffle/index.html'">
+                <div class="item-header">
+                    <span class="date">2024-11-10</span>
+                    <span class="project-name">MemoryShuffle</span>
+                </div>
+                <div class="description">기억력 훈련을 위한 게임</div>
+            </li>
+            <!-- ScoreGraph -->
+            <li class="list-group-item" onclick="location.href='./ScoreGraph/index.html'">
+                <div class="item-header">
+                    <span class="date">2023-12-25</span>
+                    <span class="project-name">ScoreGraph</span>
+                </div>
+                <div class="description">일년을 되돌아 보기 위한 그래프 만들기</div>
+            </li>
+            <!-- LifeCalender -->
+            <li class="list-group-item" onclick="location.href='./LifeCalender/index.html'">
+                <div class="item-header">
+                    <span class="date">2023-01-15</span>
+                    <span class="project-name">LifeCalender</span>
+                </div>
+                <div class="description">내 생애 주기가 어디쯤 왔는지 알아보기</div>
+            </li>
+            <!-- AzureCSS -->
+            <li class="list-group-item" onclick="location.href='./AzureCSS/index.html'">
+                <div class="item-header">
+                    <span class="date">2022-08-05</span>
+                    <span class="project-name">AzureCSS</span>
+                </div>
+                <div class="description">Azure CSS 업무를 하면서 만든 Storage account url generator</div>
+            </li>
         </ul>
     </div>
+
     <div class="footer">
-        <p>&copy; <?php echo $yearRange; ?> SimpL.kr. All rights reserved.</p>
+        <p>&copy; 2021 - 2024 SimpL.kr. All rights reserved.</p>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
+    <!-- Bootstrap JS and dependencies (Optional if no JS needed) -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
